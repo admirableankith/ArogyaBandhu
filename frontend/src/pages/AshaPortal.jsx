@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   Users,
   HeartPulse,
@@ -21,11 +22,22 @@ import DisclaimerBanner from '../components/DisclaimerBanner';
 
 export default function AshaPortal() {
   const { user } = useAuth();
+  const location = useLocation();
   const [patients, setPatients] = useState([]);
   const [highRiskCohort, setHighRiskCohort] = useState({ highRiskMothers: [], chronicPatients: [] });
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('registry'); // 'registry', 'screening', 'high-risk'
+  const [activeTab, setActiveTab] = useState(
+    location.pathname.includes('screening') ? 'screening' : 'registry'
+  ); // 'registry', 'screening', 'high-risk'
+
+  useEffect(() => {
+    if (location.pathname.includes('screening')) {
+      setActiveTab('screening');
+    } else if (location.pathname.includes('registry')) {
+      setActiveTab('registry');
+    }
+  }, [location.pathname]);
 
   // Screening form state
   const [selectedPatientId, setSelectedPatientId] = useState('');

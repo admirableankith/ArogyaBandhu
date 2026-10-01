@@ -7,10 +7,42 @@ const Notification = require('../models/Notification');
 // @access  Private
 exports.getPatientRecords = async (req, res, next) => {
   try {
-    const { patientId } = req.params;
+    let { patientId } = req.params;
     const { type } = req.query;
 
-    let query = { patientId };
+    let patient = null;
+
+    if (patientId === 'me' && req.user.role === 'patient') {
+      patient = await Patient.findOne({ userId: req.user._id });
+      if (!patient) {
+        return res.json({
+          success: true,
+          patient: null,
+          count: 0,
+          data: [],
+        });
+      }
+      patientId = patient._id;
+    } else {
+      patient = await Patient.findById(patientId);
+    }
+
+    if (!patient) {
+      return res.status(404).json({
+        success: false,
+        message: 'Patient not found',
+      });
+    }
+
+    // Strict privacy: A patient can only view their own health records
+    if (req.user.role === 'patient' && (!patient.userId || patient.userId.toString() !== req.user._id.toString())) {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden: You are not authorized to view another user’s health records.',
+      });
+    }
+
+    let query = { patientId: patient._id };
     if (type) {
       query.recordType = type;
     }
@@ -18,8 +50,6 @@ exports.getPatientRecords = async (req, res, next) => {
     const records = await HealthRecord.find(query)
       .populate('recordedBy', 'name role specialization assignedPhc')
       .sort({ date: -1 });
-
-    const patient = await Patient.findById(patientId);
 
     res.json({
       success: true,
@@ -134,10 +164,35 @@ exports.createHealthRecord = async (req, res, next) => {
 // @access  Private
 exports.getVitalsHistory = async (req, res, next) => {
   try {
-    const { patientId } = req.params;
+    let { patientId } = req.params;
+
+    let patient = null;
+    if (patientId === 'me' && req.user.role === 'patient') {
+      patient = await Patient.findOne({ userId: req.user._id });
+      if (!patient) {
+        return res.json({ success: true, data: [] });
+      }
+      patientId = patient._id;
+    } else {
+      patient = await Patient.findById(patientId);
+    }
+
+    if (!patient) {
+      return res.status(404).json({
+        success: false,
+        message: 'Patient not found',
+      });
+    }
+
+    if (req.user.role === 'patient' && (!patient.userId || patient.userId.toString() !== req.user._id.toString())) {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden: You are not authorized to view another user’s vitals history.',
+      });
+    }
 
     const vitalsRecords = await HealthRecord.find({
-      patientId,
+      patientId: patient._id,
       vitals: { $exists: true, $ne: null },
     })
       .sort({ date: 1 })

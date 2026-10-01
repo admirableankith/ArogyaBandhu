@@ -275,7 +275,10 @@ export default function Navbar({ onOpenEmergency, onToggleSidebar }) {
               </div>
               <RoleBadge role={user.role} size="small" />
               <button
-                onClick={logout}
+                onClick={() => {
+                  logout();
+                  navigate('/login');
+                }}
                 className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
                 title="Logout"
               >

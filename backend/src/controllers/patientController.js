@@ -4,31 +4,36 @@ const HealthRecord = require('../models/HealthRecord');
 
 // @desc    Get all patients (with search, filter by high risk / pregnant / village)
 // @route   GET /api/patients
-// @access  Private (asha, doctor, admin)
+// @access  Private (asha, doctor, admin; patients only see their own record)
 exports.getPatients = async (req, res, next) => {
   try {
     const { search, highRisk, isPregnant, village } = req.query;
     let query = {};
 
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { phone: { $regex: search, $options: 'i' } },
-        { abhaId: { $regex: search, $options: 'i' } },
-        { village: { $regex: search, $options: 'i' } },
-      ];
-    }
+    // Patient users must ONLY see their own patient document
+    if (req.user.role === 'patient') {
+      query.userId = req.user._id;
+    } else {
+      if (search) {
+        query.$or = [
+          { name: { $regex: search, $options: 'i' } },
+          { phone: { $regex: search, $options: 'i' } },
+          { abhaId: { $regex: search, $options: 'i' } },
+          { village: { $regex: search, $options: 'i' } },
+        ];
+      }
 
-    if (highRisk === 'true') {
-      query.isHighRisk = true;
-    }
+      if (highRisk === 'true') {
+        query.isHighRisk = true;
+      }
 
-    if (isPregnant === 'true') {
-      query.isPregnant = true;
-    }
+      if (isPregnant === 'true') {
+        query.isPregnant = true;
+      }
 
-    if (village) {
-      query.village = { $regex: village, $options: 'i' };
+      if (village) {
+        query.village = { $regex: village, $options: 'i' };
+      }
     }
 
     const patients = await Patient.find(query)
@@ -55,6 +60,14 @@ exports.getPatientById = async (req, res, next) => {
       return res.status(404).json({
         success: false,
         message: 'Patient record not found',
+      });
+    }
+
+    // Patient role can only view their own patient profile
+    if (req.user.role === 'patient' && (!patient.userId || patient.userId.toString() !== req.user._id.toString())) {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden: You are not authorized to view another patient’s profile.',
       });
     }
 

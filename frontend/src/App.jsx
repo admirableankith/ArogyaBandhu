@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import Navbar from './components/Navbar';
@@ -20,6 +20,46 @@ import DoctorPortal from './pages/DoctorPortal';
 import AdminPortal from './pages/AdminPortal';
 import PharmacyPortal from './pages/PharmacyPortal';
 
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500 font-bold text-sm">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+          <span>Verifying ArogyaBandhu Session...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
+  return children;
+}
+
+function PublicRoute({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500 font-bold text-sm">
+        <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (user) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+}
+
 function AppLayout({ children, onOpenEmergency }) {
   const { user, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -27,7 +67,10 @@ function AppLayout({ children, onOpenEmergency }) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500 font-bold text-sm">
-        Initializing ArogyaBandhu Rural Health Platform...
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+          <span>Initializing ArogyaBandhu Rural Health Platform...</span>
+        </div>
       </div>
     );
   }
@@ -59,29 +102,45 @@ function MainApp() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
+          }
+        />
         
         <Route
           path="/*"
           element={
-            <AppLayout onOpenEmergency={() => setEmergencyModalOpen(true)}>
-              <Routes>
-                <Route path="/" element={<Dashboard onOpenEmergency={() => setEmergencyModalOpen(true)} />} />
-                <Route path="/ai-assistant" element={<AiHealthAssistant />} />
-                <Route path="/facilities" element={<FacilitiesMap />} />
-                <Route path="/emergency" element={<EmergencyCenter onOpenEmergency={() => setEmergencyModalOpen(true)} />} />
-                <Route path="/records" element={<HealthRecords />} />
-                <Route path="/appointments" element={<Appointments />} />
-                <Route path="/inventory" element={<Inventory />} />
-                <Route path="/asha/registry" element={<AshaPortal />} />
-                <Route path="/asha/screening" element={<AshaPortal />} />
-                <Route path="/doctor/queue" element={<DoctorPortal />} />
-                <Route path="/admin/surveillance" element={<AdminPortal />} />
-                <Route path="/pharmacy" element={<PharmacyPortal />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout onOpenEmergency={() => setEmergencyModalOpen(true)}>
+                <Routes>
+                  <Route path="/" element={<Dashboard onOpenEmergency={() => setEmergencyModalOpen(true)} />} />
+                  <Route path="/ai-assistant" element={<AiHealthAssistant />} />
+                  <Route path="/facilities" element={<FacilitiesMap />} />
+                  <Route path="/emergency" element={<EmergencyCenter onOpenEmergency={() => setEmergencyModalOpen(true)} />} />
+                  <Route path="/records" element={<HealthRecords />} />
+                  <Route path="/appointments" element={<Appointments />} />
+                  <Route path="/inventory" element={<Inventory />} />
+                  <Route path="/asha/registry" element={<AshaPortal />} />
+                  <Route path="/asha/screening" element={<AshaPortal />} />
+                  <Route path="/doctor/queue" element={<DoctorPortal />} />
+                  <Route path="/admin/surveillance" element={<AdminPortal />} />
+                  <Route path="/pharmacy" element={<PharmacyPortal />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </AppLayout>
+            </ProtectedRoute>
           }
         />
       </Routes>

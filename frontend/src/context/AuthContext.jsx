@@ -55,6 +55,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('arogya_token', res.data.token);
         setToken(res.data.token);
         setUser(res.data.user);
+        setPatientProfile(res.data.patientProfile || null);
         return { success: true };
       }
     } catch (err) {
@@ -75,6 +76,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('arogya_token', res.data.token);
         setToken(res.data.token);
         setUser(res.data.user);
+        setPatientProfile(res.data.patientProfile || null);
         return { success: true };
       }
     } catch (err) {

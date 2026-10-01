@@ -15,6 +15,9 @@ export default function Register() {
     specialization: '',
     licenseNumber: '',
     abhaId: '',
+    age: '28',
+    gender: 'Female',
+    bloodGroup: 'B+',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -154,19 +157,68 @@ export default function Register() {
           </div>
 
           {formData.role === 'patient' && (
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                ABHA ID (Ayushman Bharat Health Account - Optional)
-              </label>
-              <input
-                type="text"
-                name="abhaId"
-                value={formData.abhaId}
-                onChange={handleChange}
-                placeholder="e.g. ABHA-9812-4411-8890"
-                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono"
-              />
-            </div>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Age</label>
+                  <input
+                    type="number"
+                    name="age"
+                    min="1"
+                    max="120"
+                    value={formData.age}
+                    onChange={handleChange}
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Gender</label>
+                  <select
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleChange}
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white"
+                  >
+                    <option value="Female">Female (महिला)</option>
+                    <option value="Male">Male (पुरुष)</option>
+                    <option value="Other">Other (अन्य)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Blood Group</label>
+                  <select
+                    name="bloodGroup"
+                    value={formData.bloodGroup}
+                    onChange={handleChange}
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white"
+                  >
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                    <option value="Unknown">Unknown</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                  ABHA ID (Ayushman Bharat Health Account - Optional)
+                </label>
+                <input
+                  type="text"
+                  name="abhaId"
+                  value={formData.abhaId}
+                  onChange={handleChange}
+                  placeholder="e.g. ABHA-9812-4411-8890"
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono"
+                />
+              </div>
+            </>
           )}
 
           {formData.role === 'doctor' && (
@@ -193,6 +245,20 @@ export default function Register() {
                   className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono"
                 />
               </div>
+            </div>
+          )}
+
+          {formData.role === 'pharmacist' && (
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Drug Retail / Pharmacy License No.</label>
+              <input
+                type="text"
+                name="licenseNumber"
+                value={formData.licenseNumber}
+                onChange={handleChange}
+                placeholder="e.g. UP-PHARMA-1029"
+                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono"
+              />
             </div>
           )}
 

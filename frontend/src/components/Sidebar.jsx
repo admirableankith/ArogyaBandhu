@@ -49,7 +49,8 @@ export default function Sidebar({ isOpen, onClose }) {
       { to: '/inventory', label: 'Essential Drug Stock', icon: Pill },
     ],
     pharmacist: [
-      { to: '/inventory', label: t('pharmacy'), icon: Package },
+      { to: '/pharmacy', label: 'Jan Aushadhi Dispensary', icon: Package },
+      { to: '/inventory', label: 'Essential Drug Catalog', icon: Pill },
       { to: '/records', label: 'Prescription Verification', icon: FileText },
       { to: '/facilities', label: 'Kendra Directory', icon: Building2 },
     ],
